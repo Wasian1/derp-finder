@@ -276,7 +276,7 @@ def main():
 
          # --- NEW OPTIMIZATION: BLOCK IMAGES & CSS ASSETS TO ACCELERATE CLOUD LOAD ---
         def block_media_and_analytics(route):
-            if route.request.resource_type in ["image", "font", "stylesheet", "media"] or "analytics" in route.request.url:
+            if route.request.resource_type in ["image", "font", "media"] or "analytics" in route.request.url:
                 route.abort()
             else:route.continue_()
             page.route("**/*", block_media_and_analytics)
