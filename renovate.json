@@ -1,0 +1,34 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "automerge": true,
+  "automergeType": "pr",
+  "extends": [
+    "config:recommended",
+    "group:all"
+  ],
+  "packageRules": [
+    {
+      "description": "Keep CI workflows pinned to Python 3.13",
+      "enabled": false,
+      "matchDatasources": [
+        "github-releases"
+      ],
+      "matchDepNames": [
+        "python"
+      ],
+      "matchFileNames": [
+        ".github/workflows/devRun.yml",
+        ".github/workflows/nightly.yml"
+      ],
+      "matchManagers": [
+        "github-actions"
+      ]
+    }
+  ],
+  "pre-commit": {
+    "enabled": true
+  },
+  "schedule": [
+    "monthly"
+  ]
+}

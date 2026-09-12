@@ -1,0 +1,65 @@
+[dependency-groups]
+dev = [
+  "ruff==0.16.4",
+  "pre-commit==4.6.2",
+  "pytest-flakiness==1.2.0",
+]
+
+[project]
+dependencies = [
+  "allure-pytest==2.16.0",
+  "axe-playwright-python==0.1.8",
+  "pandas>=2.2.3",
+  "playwright==1.62.0",
+  "pytest==9.1.1",
+  "pytest-base-url==2.1.0",
+  "pytest-playwright==0.9.0",
+  "pytest-split==0.11.0",
+  "requests==2.34.2",
+]
+description = "Gib derps"
+name = "playwright-python"
+requires-python = ">=3.12,<3.14"
+version = "0.1.0"
+
+[tool.pytest.ini_options]
+addopts = [
+  "--clean-alluredir",
+  "--alluredir=allure-results",
+  "--allure-link-pattern",
+  "issue:https://{}",
+  "--allure-link-pattern",
+  "link:https://{}",
+  "--allure-link-pattern",
+  "tms:https://{}",
+  "-ra",
+  "--color=yes",
+  "--browser=chromium",
+  "--headed",
+  "--video=retain-on-failure",
+  "--tracing=retain-on-failure"
+]
+base_url = 'https://www.saucedemo.com/'
+log_cli = true
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_level = "INFO"
+markers = [
+  "devRun: marks tests that run before merge to the main branch"
+]
+pythonpath = ["src"]
+
+[tool.ruff]
+exclude = [".venv", "env"]
+ignore = [
+  "D203",  # One blank line required before class docstring (conflicts with D211)
+  "D213",  # Multi-line docstring summary should start at the second line
+  "COM812"
+]
+line-length = 100
+select = ["ALL"]
+target-version = "py311"
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "double"

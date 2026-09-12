@@ -1,0 +1,152 @@
+name: Nightly regression tests
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      pytest_command:
+        description: "Custom pytest command"
+        required: true
+        default: '-m "not devRun"'
+        type: string
+      parallelism:
+        description: "Number of machines to split tests"
+        required: false
+        default: 2
+        type: number
+
+env:
+  FLAKINESS_PROJECT: nirtal85/Playwright-Python-Example
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  setup-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          count=${{ github.event.inputs.parallelism || 2 }}
+          matrix=$(seq -s ',' 1 $count)
+          echo "matrix=$(jq -cn --argjson groups "[$matrix]" '{group: $groups}')" >> $GITHUB_OUTPUT
+
+  nightly-test:
+    needs: setup-matrix
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+      - name: Create venv & install dependencies
+        run: |
+          uv venv
+          uv sync --all-extras --dev
+      - name: Run Tests
+        run: >
+          xvfb-run .venv/bin/python -m pytest
+          ${{ github.event.inputs.pytest_command || '-m "not devRun"' }}
+          --base-url ${{ vars.BASE_URL }}
+          --splits ${{ github.event.inputs.parallelism || 2 }}
+          --group ${{ matrix.group }}
+      - name: Upload shard test artifacts (test-results + allure-results)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: shard-${{ matrix.group }}
+          path: |
+            test-results/
+            allure-results/
+          retention-days: 7
+
+  build-report:
+    needs: nightly-test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Download all Allure results into allure-results
+        if: always()
+        uses: actions/download-artifact@v8
+        with:
+          pattern: shard-*
+          path: artifacts
+          merge-multiple: false
+      - name: Consolidate allure-results
+        if: always()
+        run: |
+          mkdir -p allure-results
+          find artifacts -type d -name "allure-results" -print0 | while IFS= read -r -d '' d; do
+            cp -R "$d/." allure-results/
+          done
+      - name: Consolidate test-results into merged-test-results
+        if: always()
+        run: |
+          mkdir -p merged-test-results
+          find artifacts -type d -name "test-results" -print0 | while IFS= read -r -d '' d; do
+            cp -R "$d/." merged-test-results/
+          done
+      - name: Upload merged test-results artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        id: merged-artifact-upload
+        with:
+          name: merged-test-results
+          path: merged-test-results/
+          retention-days: 7
+      - name: Link Git Information And Browser Version To Allure Results
+        if: always()
+        working-directory: allure-results
+        run: |
+          {
+            echo BUILD_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            echo GIT_BRANCH=${{ github.ref_name }}
+            echo GIT_COMMIT_ID=${{ github.sha }}
+            echo GIT_COMMIT_MESSAGE="$(git show -s --format=%s HEAD)"
+            echo GIT_COMMIT_AUTHOR_NAME="$(git show -s --format='%ae' HEAD)"
+            echo GIT_COMMIT_TIME="$(git show -s --format=%ci HEAD)"
+          } >> environment.properties
+      - name: Link Playwright Traces And Videos To Allure Results
+        if: always()
+        working-directory: allure-results
+        run: echo ARTIFACT_URL=${{ steps.merged-artifact-upload.outputs.artifact-url }} >> environment.properties
+      - name: Generate Allure report
+        if: always()
+        run: npx -y allure generate allure-results --output allure-report
+      - name: Upload Pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: allure-report
+  deploy_pages:
+    needs: build-report
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
