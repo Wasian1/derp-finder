@@ -2,8 +2,8 @@
 
 <img height="120" src="https://i.pinimg.com/474x/c9/19/c5/c919c5a010aa8cf79c2e5c078e1b7aee.jpg" alt="Playwright Logo"/>
 
-# Enterprise-Grade Derpy Card Purchases Go Brr
-### The Ultimate Boilerplate for Scalable, Robust, and Modern Card Collection
+# Enterprise-Grade Derpy Card Deal Finder Go Brr
+### The Ultimate Boilerplate for Scalable & Robust Modern Card Collection
 
 ![CI Status](https://github.com/nirtal85/Playwright-Python-Example/actions/workflows/devRun.yml/badge.svg)
 ![Nightly Build](https://github.com/nirtal85/Playwright-Python-Example/actions/workflows/nightly.yml/badge.svg)
@@ -18,7 +18,7 @@
 
 ## 🚀 About The Project
 
-This repository is a **Production-Ready Reference Architecture** for feeding my derpy card addiction using **Playwright**, **Python** and ~~autism~~.
+This repository is a **Production-Ready Spaghetti Code App** for feeding my derpy card addiction using **Playwright**, **Python** and ~~**autism**~~.
 
 <p align="center">
     <img src="resources/images/slowpoke.jpg" alt="Automation College - Playwright Python Course" width="600" style="border-radius: 10px;" />
@@ -56,7 +56,7 @@ This project is powered by **[BrowserStack](https://www.browserstack.com)**, ena
 ### 1. Clone
 
 ```bash
-git clone https://github.com/nirtal85/Playwright-Python-Example
+git clone https://github.com/Wasian1/derp-finder
 cd TCGScrape
 
 ### 2. Install (The Modern Way)
