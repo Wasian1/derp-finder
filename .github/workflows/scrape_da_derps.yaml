@@ -11,17 +11,16 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
-        fail-fast: false
-        matrix:
-          include:
-            - user_name: "Dan"
-              csv_file: "dan.csv"
-              delivery_email: "dcfitzsimmons1995@gmail.com"
+        include:
+          - user_name: "Dan"
+            csv_file: "dan.csv"
+            delivery_email: "dcfitzsimmons1995@gmail.com"
 
-            - user_name: "Ania"
-              csv_file: "ania.csv"
-              delivery_email: "thewasian1@gmail.com"
+          - user_name: "Ania"
+            csv_file: "ania.csv"
+            delivery_email: "thewasian1@gmail.com"
 
     steps:
     - name: Checkout Code Repository
