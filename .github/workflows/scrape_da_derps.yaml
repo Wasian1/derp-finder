@@ -10,6 +10,18 @@ jobs:
   run-scraper:
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - user_name: "Dan"
+            csv_file: "dan.csv"
+            delivery_email: "dcfitzsimmons1995@gmail.com"
+
+          - user_name: "Ania"
+            csv_file: "ania.csv"
+            delivery_email: "thewasian1@gmail.com"
+
     steps:
     - name: Checkout Code Repository
       uses: actions/checkout@v4
@@ -35,6 +47,8 @@ jobs:
       
       env:
         EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
-        
+        TARGET_CSV_NAME: ${{ matrix.csv_file }}
+        RECIPIENT_EMAIL: ${{ matrix.delivery_email }}
+
       # xvfb-run opens a fake 1920x1080 display wrapper right before executing your python script
       run: xvfb-run --server-args="-screen 0 1920x1080x24" python src/scraper/main.py
