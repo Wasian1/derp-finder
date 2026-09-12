@@ -117,7 +117,8 @@ def scrape_single_card(page, base_url: str, max_items_per_card: int, budget_targ
     timeframe_label = "3 Month Snapshot"  # Default initial state flag
 
     print(f"  -> Initializing page state for market history snapshot capture...")
-    page.goto(f"{base_url}?page=1", wait_until="networkidle", timeout=30000)
+    page.goto(f"{base_url}?page=1", wait_until="domcontentloaded", timeout=30000)
+    page.wait_for_timeout(2000)  # static buffer wait
     
     # Grab the official Card Name cleanly from the main H1 header
     name_selector = "h1.product-details__name, h1.product-name, h1"
@@ -179,7 +180,8 @@ def scrape_single_card(page, base_url: str, max_items_per_card: int, budget_targ
         print(f"  -> Scraping Page {current_page} | Total items found for this card: {len(card_records)}")
         
         if current_page > 1:
-            page.goto(target_url, wait_until="networkidle", timeout=30000)
+            page.wait_for_timeout(1000)  # Pacing delay to simulate human browsing behavior
+            page.goto(target_url, wait_until="domcontentloaded", timeout=30000)
         
         page.evaluate("window.scrollTo(0, 1200);")
         page.wait_for_timeout(1500)
@@ -268,6 +270,13 @@ def main():
         )
         context.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
         page = context.new_page()
+
+         # --- NEW OPTIMIZATION: BLOCK IMAGES & CSS ASSETS TO ACCELERATE CLOUD LOAD ---
+        def block_media_and_analytics(route):
+            if route.request.resource_type in ["image", "font", "stylesheet", "media"] or "analytics" in route.request.url:
+                route.abort()
+            else:route.continue_()
+            page.route("**/*", block_media_and_analytics)
         
         try:
             for idx, row in input_df.iterrows():
