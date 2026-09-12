@@ -118,13 +118,20 @@ def scrape_single_card(page, base_url: str, max_items_per_card: int, budget_targ
 
     print(f"  -> Initializing page state for market history snapshot capture...")
     page.goto(f"{base_url}?page=1", wait_until="domcontentloaded", timeout=30000)
-    page.wait_for_timeout(2000)  # static buffer wait
-    
-    # Grab the official Card Name cleanly from the main H1 header
+
+    # 🛠️ ADJUSTMENT 1: Explicitly wait until the H1 contains text content. 
+    # This acts as a dynamic bridge after domcontentloaded finishes.
     name_selector = "h1.product-details__name, h1.product-name, h1"
-    if page.locator(name_selector).count() > 0:
+
+    try:
+        page.wait_for_function(
+            f"() => {{ const el = document.querySelector('{name_selector}'); return el && el.textContent.trim().length > 0; }}",
+            timeout=10000
+        )
         card_name = page.locator(name_selector).first.inner_text().strip()
         print(f"  [Identified Card Name]: {card_name}")
+    except Exception:
+        print("  [Warning] Card name selector timed out or layout hydration was slow.")
 
     # --- ADVANCED INTERACTION: FORCE CLICK 1Y VIA JAVASCRIPT INJECTION ---
     try:
@@ -175,6 +182,8 @@ def scrape_single_card(page, base_url: str, max_items_per_card: int, budget_targ
         print(f"  Non-blocking error reading chart snapshot metrics: {e}")
 
     # --- STEP 2: LOOP THROUGH PAGINATION FOR SELLER LISTINGS ---
+    listing_selector = "div.listing-item, .listing-item"
+
     while len(card_records) < max_items_per_card:
         target_url = f"{base_url}?page={current_page}"
         print(f"  -> Scraping Page {current_page} | Total items found for this card: {len(card_records)}")
@@ -184,9 +193,17 @@ def scrape_single_card(page, base_url: str, max_items_per_card: int, budget_targ
             page.goto(target_url, wait_until="domcontentloaded", timeout=30000)
         
         page.evaluate("window.scrollTo(0, 1200);")
-        page.wait_for_timeout(1500)
+        #page.wait_for_timeout(1500)
+
+        # 🛠️ ADJUSTMENT 2: Replace the static timeout and immediate zero-count break.
+        # Wait up to 8 seconds for the seller grid rows to populate.
+        # If it genuinely times out, *then* we know we hit the end of the listing pages.
+        try:
+            page.wait_for_selector(listing_selector, timeout=8000)
+        except Exception:
+            print("  No visible listings located on this pagination screen. Ending card loop.")
+            break
         
-        listing_selector = "div.listing-item, .listing-item"
         if page.locator(listing_selector).count() == 0:
             print("  No visible listings located on this pagination screen. Ending card loop.")
             break
