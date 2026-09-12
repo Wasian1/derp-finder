@@ -22,7 +22,7 @@ def send_summary_email(summary_df: pd.DataFrame):
     # Replace these strings with your actual email credentials
     sender_email = "derp.finder.inc@gmail.com"
     sender_password =  os.environ.get("EMAIL_APP_PASSWORD")  # Use a Google App Password if using Gmail
-    recipient_email = "dcfitzsimmons1995@gmail.com"
+    recipient_email = os.environ.get("RECIPIENT_EMAIL", "dcfitzsimmons1995@gmail.com")
     
     smtp_server = "smtp.gmail.com"
     smtp_port = 587
@@ -242,10 +242,13 @@ def main():
     project_root = os.path.dirname(current_script_dir) # src/
 
     max_items_per_card = 70  # Limit to avoid excessive scraping per card
+
+    target_csv_name = os.environ.get("TARGET_CSV_NAME", "card_list.csv")  # Default to card_list.csv if not set
+    
     
     # 1. Look for the newly generated .csv list instead of plain .txt
-    input_csv = os.path.join(project_root, "scrape_list", "card_list.csv")
-    output_path = os.path.join(os.path.dirname(project_root), "data", "output.csv")
+    input_csv = os.path.join(project_root, "scrape_list", target_csv_name)
+    output_path = os.path.join(os.path.dirname(project_root), "data",f"output_{target_csv_name}")
     
     if not os.path.exists(input_csv):
         print(f"❌ Error: Config file not found at path: {input_csv}")
