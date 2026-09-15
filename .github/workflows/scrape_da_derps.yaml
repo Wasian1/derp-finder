@@ -20,7 +20,7 @@ jobs:
 
           - user_name: "Ania"
             csv_file: "ania.csv"
-            delivery_email: "thewasian1@gmail.com"
+            delivery_email: "alixiang06@gmail.com"
 
     steps:
     - name: Checkout Code Repository
