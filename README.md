@@ -27,9 +27,6 @@ This repository is a **Production-Ready Spaghetti Code App** for feeding my derp
 
 ### ✨ Key Features
 * **Modern Tooling:** Powered by `uv` for blazing fast package management and `Ruff` for linting.
-* **Accessibility First:** Integrated **Axe** scans to ensure your app is accessible to everyone.
-* **Deep Debugging:** Full integration with **Playwright Traces** and Video recording linked directly to Allure Reports.
-* **Cloud Scale:** Native integration with **BrowserStack** for cross-browser testing on real devices.
 * **CI/CD Optimization:** Parallel execution strategies and dynamic version syncing for GitHub Actions.
 
 ---
@@ -40,14 +37,7 @@ This repository is a **Production-Ready Spaghetti Code App** for feeding my derp
 |-------------------------------------------------------------------|------------------------------------------------------------------|
 | [Playwright](https://pypi.org/project/playwright/)                | The modern standard for reliable, flaky-free browser automation. |
 | [Pytest](https://pypi.org/project/pytest/)                        | The most powerful testing framework for Python.                  |
-| [Axe Playwright](https://pypi.org/project/axe-playwright-python/) | For automated accessibility (A11y) compliance testing.           |
-| [Allure](https://pypi.org/project/allure-pytest/)                 | For beautiful, data-rich test reports including Traces & Video.  |
-| [Pytest Split](https://pypi.org/project/pytest-split/)            | To intelligently split test suites for parallel execution.       |
 | [Requests](https://pypi.org/project/requests/)                    | For API interactions and test data setup.                        |
-
-### 🌐 Cloud Testing Provider
-
-This project is powered by **[BrowserStack](https://www.browserstack.com)**, enabling high-scale cross-browser and mobile testing on real devices in the cloud.
 
 ---
 
@@ -97,22 +87,6 @@ Run specific suite (Tags):
 ```bash
 pytest -m sanity
 ```
-
-## 📊 Results, Traces & Debugging
-
-We use Allure for reporting. To generate and open the report locally:
-
-```bash
-npx -y allure generate allure-results --output allure-report --open
-```
-
-### 🕵️‍♀️ Using the Trace Viewer
-
-Navigate to the Playwright Trace Viewer.
-
-Drag & Drop the trace file (located in test-results/) generated after a failure.
-
-Time Travel: Move back and forth in the timeline to see exactly what happened (Network, DOM, Console).
 
 ---
 
